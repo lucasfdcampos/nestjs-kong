@@ -1,0 +1,20 @@
+version: "3.8"
+
+networks:
+  kong-net:
+    external: true
+
+services:
+  diddy:
+    container_name: diddy
+    build:
+      context: diddy
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - $PWD/diddy:/usr/src/app
+      - $PWD/diddy/usr/src/app/node_modules
+      - $HOME/.cache/yarn:/yarncache
+    command: yarn start:dev
+    ports:
+      - 3000:3000
