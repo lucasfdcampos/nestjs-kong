@@ -21,41 +21,41 @@ services:
     ports:
       - 3000:3000   
 
-  kong-migrations:
-    image: "kong:2.7.0-alpine"
-    command: kong migrations bootstrap
-    depends_on:
-      - kong-db
-    environment:
-      KONG_DATABASE: postgres
-      KONG_PG_DATABASE: kong
-      KONG_PG_HOST: kong-db
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: kong
-    networks:
-      - kong-net
-    restart: on-failure
-    deploy:
-      restart_policy:
-        condition: on-failure 
+  # kong-migrations:
+  #   image: "kong:2.7.0-alpine"
+  #   command: kong migrations bootstrap
+  #   depends_on:
+  #     - kong-db
+  #   environment:
+  #     KONG_DATABASE: postgres
+  #     KONG_PG_DATABASE: kong
+  #     KONG_PG_HOST: kong-db
+  #     KONG_PG_USER: kong
+  #     KONG_PG_PASSWORD: kong
+  #   networks:
+  #     - kong-net
+  #   restart: on-failure
+  #   deploy:
+  #     restart_policy:
+  #       condition: on-failure 
 
-  kong-migrations-up:
-    image: "kong:2.7.0-alpine"
-    command: kong migrations up && kong migrations finish
-    depends_on:
-      - kong-db
-    environment:
-      KONG_DATABASE: postgres
-      KONG_PG_DATABASE: kong
-      KONG_PG_HOST: kong-db
-      KONG_PG_USER: kong
-      KONG_PG_PASSWORD: kong
-    networks:
-      - kong-net
-    restart: on-failure
-    deploy:
-      restart_policy:
-        condition: on-failure
+  # kong-migrations-up:
+  #   image: "kong:2.7.0-alpine"
+  #   command: kong migrations up && kong migrations finish
+  #   depends_on:
+  #     - kong-db
+  #   environment:
+  #     KONG_DATABASE: postgres
+  #     KONG_PG_DATABASE: kong
+  #     KONG_PG_HOST: kong-db
+  #     KONG_PG_USER: kong
+  #     KONG_PG_PASSWORD: kong
+  #   networks:
+  #     - kong-net
+  #   restart: on-failure
+  #   deploy:
+  #     restart_policy:
+  #       condition: on-failure
 
   kong:
     container_name: kong
@@ -64,20 +64,23 @@ services:
       dockerfile: Dockerfile
       target: development
     user: "kong"
-    depends_on:
-      - kong-db
+    # depends_on:
+    #   - kong-db
     environment:
-      KONG_ADMIN_ACCESS_LOG: /dev/stdout
-      KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_LISTEN: '0.0.0.0:8001'
-      KONG_CASSANDRA_CONTACT_POINTS: kong-db
-      KONG_DATABASE: postgres
-      KONG_PG_DATABASE: kong
-      KONG_PG_HOST: kong-db
-      KONG_PG_USER: kong
-      KONG_PROXY_ACCESS_LOG: /dev/stdout
-      KONG_PROXY_ERROR_LOG: /dev/stderr
-      KONG_PG_PASSWORD: kong
+      KONG_DATABASE: 'off'
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.json
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001, 0.0.0.0:8444 ssl"
+      # KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      # KONG_ADMIN_ERROR_LOG: /dev/stderr
+      # KONG_ADMIN_LISTEN: '0.0.0.0:8001'
+      # KONG_CASSANDRA_CONTACT_POINTS: kong-db
+      # KONG_DATABASE: postgres
+      # KONG_PG_DATABASE: kong
+      # KONG_PG_HOST: kong-db
+      # KONG_PG_USER: kong
+      # KONG_PROXY_ACCESS_LOG: /dev/stdout
+      # KONG_PROXY_ERROR_LOG: /dev/stderr
+      # KONG_PG_PASSWORD: kong
     networks:
       - kong-net
     ports:
@@ -85,6 +88,8 @@ services:
       - "127.0.0.1:8001:8001/tcp"
       - "8443:8443/tcp"
       - "127.0.0.1:8444:8444/tcp"
+    volumes:
+      - $PWD/kong:/kong/declarative/
     healthcheck:
       test: ["CMD", "kong", "health"]
       interval: 10s
@@ -95,56 +100,56 @@ services:
       restart_policy:
         condition: on-failure
 
-  kong-db:
-    container_name: kong-db
-    image: postgres:9.5
-    environment:
-      POSTGRES_USER: kong
-      POSTGRES_PASSWORD: kong
-      POSTGRES_DB: kong
-      POSTGRES_HOST: kong-db
-      POSTGRES_PORT: 5432
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "kong"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-    restart: on-failure
-    deploy:
-      restart_policy:
-        condition: on-failure
-    stdin_open: true
-    tty: true
-    networks:
-      - kong-net
-    volumes:      
-       - ./.docker/pg-data-kong:/var/lib/postgresql/data
+  # kong-db:
+  #   container_name: kong-db
+  #   image: postgres:9.5
+  #   environment:
+  #     POSTGRES_USER: kong
+  #     POSTGRES_PASSWORD: kong
+  #     POSTGRES_DB: kong
+  #     POSTGRES_HOST: kong-db
+  #     POSTGRES_PORT: 5432
+  #   healthcheck:
+  #     test: ["CMD", "pg_isready", "-U", "kong"]
+  #     interval: 30s
+  #     timeout: 30s
+  #     retries: 3
+  #   restart: on-failure
+  #   deploy:
+  #     restart_policy:
+  #       condition: on-failure
+  #   stdin_open: true
+  #   tty: true
+  #   networks:
+  #     - kong-net
+  #   volumes:      
+  #      - ./.docker/pg-data-kong:/var/lib/postgresql/data
   
-  konga-prepare:
-    container_name: konga-prepare
-    image: pantsel/konga:latest
-    command: "-c prepare -a postgres -u postgresql://kong:kong@kong-db:5432/konga_db"
-    networks:
-      - kong-net
-    restart: on-failure
-    depends_on:
-      - kong-db
+  # konga-prepare:
+  #   container_name: konga-prepare
+  #   image: pantsel/konga:latest
+  #   command: "-c prepare -a postgres -u postgresql://kong:kong@kong-db:5432/konga_db"
+  #   networks:
+  #     - kong-net
+  #   restart: on-failure
+  #   depends_on:
+  #     - kong-db
 
-  konga:
-    container_name: konga
-    image: pantsel/konga:latest
-    restart: always
-    networks:
-      - kong-net
-    environment:
-      DB_ADAPTER: postgres
-      DB_HOST: kong-db
-      DB_USER: kong
-      DB_PASSWORD: kong
-      TOKEN_SECRET: ahfdjgjgf79JKLFHJKh978953kgdfjkl
-      DB_DATABASE: konga_db
-      NODE_ENV: production
-    depends_on:
-      - kong-db
-    ports:
-      - "1337:1337"
+  # konga:
+  #   container_name: konga
+  #   image: pantsel/konga:latest
+  #   restart: always
+  #   networks:
+  #     - kong-net
+  #   environment:
+  #     DB_ADAPTER: postgres
+  #     DB_HOST: kong-db
+  #     DB_USER: kong
+  #     DB_PASSWORD: kong
+  #     TOKEN_SECRET: ahfdjgjgf79JKLFHJKh978953kgdfjkl
+  #     DB_DATABASE: konga_db
+  #     NODE_ENV: production
+  #   depends_on:
+  #     - kong-db
+  #   ports:
+  #     - "1337:1337"

@@ -32,4 +32,18 @@ export class OrdersService {
 
     return orders;
   }
+
+  createOrder() {
+    const orders = this.getOrders();
+
+    const order = {
+      id: `${orders.length + 1}`,
+      name: `Order ${orders.length + 1}`,
+      price: Math.floor(Math.random() * 100),
+    };
+
+    orders.push(order);
+
+    return orders;
+  }
 }

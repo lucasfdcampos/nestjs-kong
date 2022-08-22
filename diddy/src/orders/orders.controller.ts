@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Put } from '@nestjs/common';
+import { Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 
 @Controller('orders')
@@ -17,7 +17,11 @@ export class OrdersController {
 
   @Put('/:id')
   updateOrder(@Param('id') id: string) {
-    console.log(id);
     return this.ordersService.updateOrder(id);
+  }
+
+  @Post()
+  createOrder() {
+    return this.ordersService.createOrder();
   }
 }

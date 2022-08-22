@@ -15,10 +15,32 @@
           "id": "10363e24-ede7-47b7-94c1-82d3b36c903a",
           "methods": [
             "GET",
+            "POST",
             "OPTIONS"
           ],
           "paths": [
             "/orders"
+          ],
+          "path_handling": "v1",
+          "preserve_host": false,
+          "protocols": [
+            "http",
+            "https"
+          ],
+          "regex_priority": 0,
+          "strip_path": false,
+          "https_redirect_status_code": 426,
+          "request_buffering": true,
+          "response_buffering": true
+        },
+        {
+          "id": "82784eb8-339b-475b-8d46-0173a7259687",
+          "methods": [
+            "PUT",
+            "OPTIONS"
+          ],
+          "paths": [
+            "/orders/"
           ],
           "path_handling": "v1",
           "preserve_host": false,
